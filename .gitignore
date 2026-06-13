@@ -1,0 +1,19 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# LaTeX and build output
+output/
+
+# Local data (User should copy from example)
+# Uncomment the line below if you want to keep your private data local only
+data/cv_data.json
+
+# VS Code
+.vscode/

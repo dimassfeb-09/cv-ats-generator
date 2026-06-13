@@ -1,0 +1,139 @@
+\documentclass[9pt, a4paper]{extarticle}
+
+% --- Package Imports ---
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1.2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{parskip}
+\linespread{0.93}
+
+% --- Hyperref Config ---
+\hypersetup{
+    colorlinks=true,
+    urlcolor=black,
+    linkcolor=black
+}
+
+% --- Section Heading Config ---
+\titleformat{\section}
+  {\large\bfseries}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{5pt}{2pt}
+
+% --- Disable Page Numbering ---
+\pagestyle{empty}
+
+\begin{document}
+
+% --- HEADER ---
+\begin{center}
+    {\LARGE\bfseries \VAR{personal.name}}\\[4pt]
+    \BLOCK{set sep1 = joiner(" \\textbar{} ") }\BLOCK{if personal.phone}\VAR{sep1()}\VAR{personal.phone}\BLOCK{endif}\BLOCK{if personal.email}\VAR{sep1()}\href{mailto:\VAR{personal.email}}{\VAR{personal.email}}\BLOCK{endif}\BLOCK{if personal.location}\VAR{sep1()}\VAR{personal.location}\BLOCK{endif}\\%
+    \BLOCK{set sep2 = joiner(" \\textbar{} ") }\BLOCK{if personal.linkedin}\VAR{sep2()}\href{\VAR{personal.linkedin}}{\VAR{personal.linkedin | clean_url}}\BLOCK{endif}\BLOCK{if personal.github}\VAR{sep2()}\href{\VAR{personal.github}}{\VAR{personal.github | clean_url}}\BLOCK{endif}\BLOCK{if personal.portfolio}\VAR{sep2()}\href{\VAR{personal.portfolio}}{\VAR{personal.portfolio | clean_url}}\BLOCK{endif}
+\end{center}
+
+% --- SUMMARY ---
+\BLOCK{if summary}
+\section{Professional Summary}
+\VAR{summary}
+\BLOCK{endif}
+
+% --- EXPERIENCE ---
+\section{Work Experience}
+\BLOCK{for job in experience}
+\textbf{\VAR{job.title}} \hfill \VAR{job.start_date} -- \VAR{job.end_date}\\
+\textit{\VAR{job.company}}, \VAR{job.location}
+\BLOCK{if job['bullets']}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+\BLOCK{for bullet in job['bullets']}
+    \BLOCK{if bullet is mapping}
+    \item \textbf{\VAR{bullet.header}}
+    \begin{itemize}[leftmargin=1.5em, noitemsep, topsep=0pt]
+        \BLOCK{for item in bullet['items']}
+        \item \VAR{item}
+        \BLOCK{endfor}
+    \end{itemize}
+    \BLOCK{else}
+    \item \VAR{bullet}
+    \BLOCK{endif}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\vspace{2pt}
+\BLOCK{endfor}
+
+% --- PROJECTS ---
+\BLOCK{if projects}
+\section{Projects}
+\BLOCK{for project in projects}
+\textbf{\VAR{project.name}} \BLOCK{if project.link}\textbar{} \href{\VAR{project.link}}{Link}\BLOCK{endif} \hfill \BLOCK{if project.start_date}\VAR{project.start_date} -- \VAR{project.end_date}\BLOCK{endif}\\
+\textit{Technologies: \VAR{project.technologies | join(', ')}}
+\BLOCK{if project.description or project['bullets']}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+\BLOCK{if project.description}
+    \item \VAR{project.description}
+\BLOCK{endif}
+\BLOCK{for bullet in project['bullets']}
+    \BLOCK{if bullet is mapping}
+    \item \textbf{\VAR{bullet.header}}
+    \begin{itemize}[leftmargin=1.5em, noitemsep, topsep=0pt]
+        \BLOCK{for item in bullet['items']}
+        \item \VAR{item}
+        \BLOCK{endfor}
+    \end{itemize}
+    \BLOCK{else}
+    \item \VAR{bullet}
+    \BLOCK{endif}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\vspace{2pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- ACHIEVEMENTS ---
+\BLOCK{if achievements}
+\section{Achievements}
+\BLOCK{for ach in achievements}
+\textbf{\VAR{ach.title}} \hfill \VAR{ach.date}\\
+\textit{\VAR{ach.organizer}}
+\BLOCK{if ach['bullets']}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+\BLOCK{for bullet in ach['bullets']}
+    \item \VAR{bullet}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\vspace{2pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- SKILLS ---
+\section{Skills}
+\BLOCK{for category in skills}
+\textbf{\VAR{category.name}}: \VAR{category['items'] | join(', ')}\\
+\BLOCK{endfor}
+
+% --- CERTIFICATIONS ---
+\BLOCK{if certifications}
+\section{Certifications}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+\BLOCK{for cert in certifications}
+    \item \textbf{\VAR{cert.name}} --- \VAR{cert.issuer}\BLOCK{if cert.year}, \VAR{cert.year}\BLOCK{endif}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- EDUCATION ---
+\section{Education}
+\BLOCK{for edu in education}
+\textbf{\VAR{edu.degree}} \hfill \VAR{edu.graduation_year}\\
+\textit{\VAR{edu.institution}}, \VAR{edu.location}\\
+\vspace{2pt}
+\BLOCK{endfor}
+
+
+\end{document}

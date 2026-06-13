@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "personal": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "linkedin": { "type": "string" },
+        "github": { "type": "string" },
+        "portfolio": { "type": "string" },
+        "location": { "type": "string" }
+      },
+      "required": ["name", "email"]
+    },
+    "summary": { "type": "string" },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "company": { "type": "string" },
+          "location": { "type": "string" },
+          "start_date": { "type": "string" },
+          "end_date": { "type": "string" },
+          "bullets": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "header": { "type": "string" },
+                    "items": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  },
+                  "required": ["header", "items"]
+                }
+              ]
+            }
+          }
+        },
+        "required": ["title", "company", "start_date", "end_date"]
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "degree": { "type": "string" },
+          "institution": { "type": "string" },
+          "location": { "type": "string" },
+          "graduation_year": { "type": "string" }
+        },
+        "required": ["degree", "institution", "graduation_year"]
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "technologies": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "link": { "type": ["string", "null"] },
+          "start_date": { "type": "string" },
+          "end_date": { "type": "string" },
+          "bullets": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "header": { "type": "string" },
+                    "items": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  },
+                  "required": ["header", "items"]
+                }
+              ]
+            }
+          }
+        },
+        "required": ["name", "description"]
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["name", "items"]
+      }
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "issuer": { "type": "string" },
+          "year": { "type": "string" }
+        },
+        "required": ["name"]
+      }
+    },
+    "achievements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "organizer": { "type": "string" },
+          "date": { "type": "string" },
+          "bullets": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["title", "organizer", "date"]
+      }
+    }
+  },
+  "required": ["personal", "experience", "education", "skills"]
+}

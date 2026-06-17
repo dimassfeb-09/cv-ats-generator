@@ -18,7 +18,7 @@ def test_load_data_invalid_json(tmp_path):
     with open(data_file, "w") as f:
         f.write("{invalid: json}")
     
-    with pytest.raises(SystemExit):
+    with pytest.raises(json.JSONDecodeError):
         load_data(data_file)
 
 def test_validate_data_valid(tmp_path):
@@ -46,7 +46,8 @@ def test_validate_data_invalid(tmp_path):
         json.dump(schema, f)
     
     data = {"age": 25}
-    with pytest.raises(SystemExit):
+    import jsonschema
+    with pytest.raises(jsonschema.ValidationError):
         validate_data(data, schema_file)
 
 def test_render_template(tmp_path):

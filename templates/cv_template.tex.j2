@@ -1,15 +1,36 @@
-\documentclass[9pt, a4paper]{extarticle}
+\documentclass[\VAR{settings.font_size | default('9pt')}, a4paper]{extarticle}
 
 % --- Package Imports ---
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+
+\BLOCK{ if settings and settings.font_family == 'helvetica' }
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\BLOCK{ elif settings and settings.font_family == 'palatino' }
+\usepackage{mathpazo}
+\BLOCK{ elif settings and settings.font_family == 'times' }
+\usepackage{mathptmx}
+\BLOCK{ elif settings and settings.font_family == 'garamond' }
+\usepackage{ebgaramond}
+\BLOCK{ elif settings and settings.font_family == 'sans' }
 \usepackage{lmodern}
+\renewcommand{\familydefault}{\sfdefault}
+\BLOCK{ else }
+\usepackage{lmodern}
+\BLOCK{ endif }
+
+\BLOCK{ if settings and settings.margin }
+\usepackage[margin=\VAR{settings.margin}]{geometry}
+\BLOCK{ else }
 \usepackage[margin=1.2cm]{geometry}
+\BLOCK{ endif }
+
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{hyperref}
 \usepackage{parskip}
-\linespread{0.93}
+\linespread{\VAR{settings.line_spacing | default('0.93')}}
 
 % --- Hyperref Config ---
 \hypersetup{
@@ -131,7 +152,7 @@
 \section{Education}
 \BLOCK{for edu in education}
 \textbf{\VAR{edu.degree}} \hfill \VAR{edu.graduation_year}\\
-\textit{\VAR{edu.institution}}, \VAR{edu.location}\\
+\textit{\VAR{edu.institution}}\BLOCK{if edu.location}, \VAR{edu.location}\BLOCK{endif}\BLOCK{if edu.gpa} (GPA: \VAR{edu.gpa})\BLOCK{endif}\\
 \vspace{2pt}
 \BLOCK{endfor}
 

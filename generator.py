@@ -50,82 +50,66 @@ def escape_latex(obj):
 
 def load_data(file_path):
     """Load CV data from JSON file."""
-    try:
-        if not file_path.exists():
-            # Fallback to example if main data doesn't exist or is default
-            example_path = DATA_DIR / "cv_data.example.json"
-            if example_path.exists():
-                print(f"WARN: {file_path.name} tidak ditemukan. Menggunakan example data.")
-                file_path = example_path
-        
-        with open(file_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print(f"ERROR: File {file_path} tidak ditemukan.")
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"ERROR: Format JSON tidak valid di {file_path}: {e}")
-        sys.exit(1)
+    if not file_path.exists():
+        # Fallback to example if main data doesn't exist or is default
+        example_path = DATA_DIR / "cv_data.example.json"
+        if example_path.exists():
+            print(f"WARN: {file_path.name} tidak ditemukan. Menggunakan example data.")
+            file_path = example_path
+        else:
+            raise FileNotFoundError(f"File {file_path} tidak ditemukan.")
+    
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def validate_data(data, schema_path):
     """Validate data against JSON schema."""
-    try:
-        with open(schema_path, "r", encoding="utf-8") as f:
-            schema = json.load(f)
-        jsonschema.validate(instance=data, schema=schema)
-        print("OK: Data valid sesuai schema.")
-    except jsonschema.ValidationError as e:
-        print(f"ERROR: Validasi data gagal: {e.message}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"ERROR saat memvalidasi: {e}")
-        sys.exit(1)
+    with open(schema_path, "r", encoding="utf-8") as f:
+        schema = json.load(f)
+    jsonschema.validate(instance=data, schema=schema)
+    print("OK: Data valid sesuai schema.")
 
 def render_template(data, template_dir, template_name, output_path):
     """Render LaTeX template with data."""
-    try:
-        # Jinja2 environment configured for LaTeX
-        env = Environment(
-            loader=FileSystemLoader(template_dir),
-            block_start_string=r'\BLOCK{',
-            block_end_string='}',
-            variable_start_string=r'\VAR{',
-            variable_end_string='}',
-            comment_start_string=r'\#{',
-            comment_end_string='}',
-            line_statement_prefix='%%',
-            line_comment_prefix='%#',
-            trim_blocks=True,
-            lstrip_blocks=True,
-            autoescape=False,
-        )
+    # Jinja2 environment configured for LaTeX
+    env = Environment(
+        loader=FileSystemLoader(template_dir),
+        block_start_string=r'\BLOCK{',
+        block_end_string='}',
+        variable_start_string=r'\VAR{',
+        variable_end_string='}',
+        comment_start_string=r'\#{',
+        comment_end_string='}',
+        line_statement_prefix='%%',
+        line_comment_prefix='%#',
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=False,
+    )
+    
+    def clean_url_filter(url):
+        if not url:
+            return ""
+        # Remove protocol (http/https)
+        url = re.sub(r'^https?://', '', url)
+        # Remove www.
+        url = re.sub(r'^www\.', '', url)
+        # Remove trailing slash
+        url = url.rstrip('/')
+        return url
         
-        def clean_url_filter(url):
-            if not url:
-                return ""
-            # Remove protocol (http/https)
-            url = re.sub(r'^https?://', '', url)
-            # Remove www.
-            url = re.sub(r'^www\.', '', url)
-            # Remove trailing slash
-            url = url.rstrip('/')
-            return url
-            
-        env.filters['clean_url'] = clean_url_filter
-        
-        template = env.get_template(template_name)
-        rendered_content = template.render(**data)
-        
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(rendered_content)
-        print(f"OK: Template berhasil di-render ke {output_path.name}.")
-    except Exception as e:
-        print(f"ERROR saat me-render template: {e}")
-        sys.exit(1)
+    env.filters['clean_url'] = clean_url_filter
+    
+    template = env.get_template(template_name)
+    rendered_content = template.render(**data)
+    
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(rendered_content)
+    print(f"OK: Template berhasil di-render ke {output_path.name}.")
 
 def compile_pdf(tex_path, output_dir):
-    """Compile .tex file to PDF using pdflatex."""
+    """Compile .tex file to PDF using pdflatex. Returns (success, log_output)"""
     try:
         # Run pdflatex twice for references/links
         cmd = [
@@ -135,25 +119,29 @@ def compile_pdf(tex_path, output_dir):
             str(tex_path)
         ]
         
+        last_log = ""
         for i in range(1, 3):
             print(f"RUN: Menjalankan pdflatex (run {i}/2)...")
             result = subprocess.run(cmd, capture_output=True, text=True)
+            last_log = result.stdout
             if result.returncode != 0:
                 print(f"ERROR saat kompilasi LaTeX (Run {i}):")
                 # Show last few lines of output for debugging
                 log_lines = result.stdout.splitlines()
-                for line in log_lines[-20:]:
-                    print(line)
-                return False
+                error_log = "\n".join(log_lines[-20:])
+                print(error_log)
+                return False, error_log
         
         print(f"OK: PDF berhasil dibuat di {output_dir}.")
-        return True
+        return True, ""
     except FileNotFoundError:
-        print("ERROR: 'pdflatex' tidak ditemukan. Pastikan MiKTeX atau TeX Live sudah terinstall dan ada di PATH.")
-        return False
+        error_msg = "ERROR: 'pdflatex' tidak ditemukan. Pastikan MiKTeX atau TeX Live sudah terinstall dan ada di PATH."
+        print(error_msg)
+        return False, error_msg
     except Exception as e:
-        print(f"ERROR tak terduga saat kompilasi: {e}")
-        return False
+        error_msg = f"ERROR tak terduga saat kompilasi: {e}"
+        print(error_msg)
+        return False, error_msg
 
 def cleanup(output_dir, base_name):
     """Remove intermediate LaTeX files."""
@@ -164,30 +152,51 @@ def cleanup(output_dir, base_name):
             file_to_del.unlink()
     print("DONE: File sementara dibersihkan.")
 
-def main():
-    print("START: Memulai proses pembuatan CV ATS...")
+def generate_cv_from_data(data, output_dir=OUTPUT_DIR):
+    """
+    Generates PDF from data dictionary.
+    Validates, escapes, renders, compiles, and cleans up.
+    Returns path to the compiled PDF if successful.
+    Raises Exception if validation or compilation fails.
+    """
+    # 1. Validate data
+    try:
+        validate_data(data, SCHEMA_FILE)
+    except jsonschema.ValidationError as e:
+        raise ValueError(f"Validasi data gagal: {e.message}")
+    except Exception as e:
+        raise ValueError(f"Gagal memvalidasi data: {e}")
+        
+    # 2. Escape LaTeX special characters
+    escaped_data = escape_latex(data)
     
-    # 1. Load Data
-    data = load_data(DATA_FILE)
-    
-    # 2. Validate Data
-    validate_data(data, SCHEMA_FILE)
-    
-    # 3. Escape LaTeX special characters
-    data = escape_latex(data)
-    
-    # 4. Render Template
-    render_template(data, TEMPLATE_DIR, TEMPLATE_FILE, OUTPUT_TEX)
-    
-    # 5. Compile PDF
-    success = compile_pdf(OUTPUT_TEX, OUTPUT_DIR)
+    # 3. Render Template
+    try:
+        render_template(escaped_data, TEMPLATE_DIR, TEMPLATE_FILE, OUTPUT_TEX)
+    except Exception as e:
+        raise RuntimeError(f"Gagal me-render template LaTeX: {e}")
+        
+    # 4. Compile PDF
+    success, error_log = compile_pdf(OUTPUT_TEX, output_dir)
     
     if success:
-        # 6. Cleanup
-        cleanup(OUTPUT_DIR, "cv_output")
-        print(f"\nFINISH: Selesai! CV Anda dapat ditemukan di: {OUTPUT_PDF}")
+        # 5. Cleanup
+        cleanup(output_dir, "cv_output")
+        return OUTPUT_PDF
     else:
-        print("\nERROR: Gagal membuat PDF.")
+        raise RuntimeError(f"Kompilasi LaTeX gagal. Log error:\n{error_log}")
+
+def main():
+    print("START: Memulai proses pembuatan CV ATS...")
+    try:
+        # 1. Load Data
+        data = load_data(DATA_FILE)
+        
+        # 2. Generate PDF
+        pdf_path = generate_cv_from_data(data, OUTPUT_DIR)
+        print(f"\nFINISH: Selesai! CV Anda dapat ditemukan di: {pdf_path}")
+    except Exception as e:
+        print(f"\nERROR: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

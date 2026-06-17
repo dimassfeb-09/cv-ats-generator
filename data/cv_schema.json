@@ -57,7 +57,8 @@
           "degree": { "type": "string" },
           "institution": { "type": "string" },
           "location": { "type": "string" },
-          "graduation_year": { "type": "string" }
+          "graduation_year": { "type": "string" },
+          "gpa": { "type": "string" }
         },
         "required": ["degree", "institution", "graduation_year"]
       }
@@ -139,6 +140,15 @@
           }
         },
         "required": ["title", "organizer", "date"]
+      }
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "font_size": { "type": "string" },
+        "font_family": { "type": "string" },
+        "margin": { "type": "string" },
+        "line_spacing": { "type": "string" }
       }
     }
   },

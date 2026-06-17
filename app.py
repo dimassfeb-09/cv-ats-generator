@@ -161,5 +161,7 @@ app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Memulai server CV ATS Generator di http://127.0.0.1:8000")
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    import os
+    host = os.getenv("HOST", "127.0.0.1")
+    print(f"🚀 Memulai server CV ATS Generator di http://{host}:8000")
+    uvicorn.run("app:app", host=host, port=8000, reload=True)

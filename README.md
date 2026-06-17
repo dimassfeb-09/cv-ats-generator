@@ -17,6 +17,9 @@ Sebelum menggunakan aplikasi ini, pastikan kamu sudah menginstall:
 1. **Python 3.x**
 2. **MiKTeX** atau **TeX Live** (untuk menjalankan `pdflatex`). Pastikan `pdflatex` sudah ada di PATH terminal kamu.
 
+> [!TIP]
+> **Tidak ingin menginstall LaTeX secara lokal?** Anda dapat menggunakan **Docker** (untuk lokal) atau **GitHub Actions** (untuk cloud) yang telah dikonfigurasi dalam repositori ini agar kompilasi dilakukan secara otomatis di container/cloud tanpa instalasi LaTeX di sistem Anda (baca panduannya di bawah).
+
 ## 📥 Instalasi
 
 1. **Clone Repository**
@@ -68,6 +71,34 @@ Setelah server aktif, buka **[http://127.0.0.1:8000](http://127.0.0.1:8000)** di
    ```bash
    python watch_build.py
    ```
+
+---
+
+## 🐳 Opsi Alternatif (Tanpa Install LaTeX Secara Lokal)
+
+Jika Anda tidak ingin mengunduh software LaTeX (MiKTeX/TeX Live) yang berukuran cukup besar di komputer lokal Anda, ada 2 opsi alternatif:
+
+### Opsi A: Menggunakan Docker (Rekomendasi Local Setup)
+Aplikasi ini sudah dilengkapi dengan `Dockerfile` yang memaketkan Python dan instalasi LaTeX minimal secara otomatis.
+
+1. **Build Docker Image**
+   ```bash
+   docker build -t cv-ats-generator .
+   ```
+2. **Jalankan Container**
+   ```bash
+   docker run -p 8000:8000 cv-ats-generator
+   ```
+3. Buka **[http://127.0.0.1:8000](http://127.0.0.1:8000)** di browser Anda. Seluruh proses compile akan berjalan di dalam container.
+
+### Opsi B: Kompilasi Otomatis via GitHub Actions (Rekomendasi Cloud Setup)
+Repositori ini telah dikonfigurasi dengan workflow CI/CD GitHub Actions (`.github/workflows/compile-pdf.yml`).
+
+1. Edit data CV Anda (`data/cv_data.json`) langsung di repositori GitHub Anda (atau edit secara lokal dan lakukan `git push`).
+2. Setiap kali ada perubahan di file data JSON atau template LaTeX yang di-push, GitHub Actions akan **otomatis mengompilasi PDF** Anda di server GitHub.
+3. Tunggu sekitar 1 menit, hasil jadi PDF terbaru akan di-commit kembali oleh bot ke folder `output/cv_output.pdf` di repositori Anda. Anda tinggal mengunduh berkasnya dari GitHub!
+
+---
 
 ## 📂 Struktur Proyek
 - `app.py`: Backend FastAPI untuk melayani antarmuka web dan API simpan/kompilasi.

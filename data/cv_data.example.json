@@ -8,6 +8,13 @@
     "portfolio": "https://dimaspratama.dev",
     "location": "Jakarta, Indonesia"
   },
+  "settings": {
+    "font_size": "9pt",
+    "font_family": "lmodern",
+    "margin": "1.2cm",
+    "line_spacing": "0.93",
+    "language": "en"
+  },
   "summary": "Software Engineer berpengalaman dengan fokus pada pengembangan backend menggunakan Python dan sistem otomasi. Terbiasa bekerja dengan tim agile dan memiliki passion dalam membangun solusi yang efisien dan scalable.",
   "experience": [
     {

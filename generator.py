@@ -90,11 +90,11 @@ def render_template(data, template_dir, template_name, output_path):
     def clean_url_filter(url):
         if not url:
             return ""
-        # Remove protocol (http/https)
-        url = re.sub(r'^https?://', '', url)
-        # Remove www.
-        url = re.sub(r'^www\.', '', url)
-        # Remove trailing slash
+        # Ensure https:// prefix is shown, strip www. and trailing slash
+        url = re.sub(r'^http://', 'https://', url)
+        if not url.startswith('https://'):
+            url = 'https://' + url
+        url = re.sub(r'^https://www\.', 'https://', url)
         url = url.rstrip('/')
         return url
         
